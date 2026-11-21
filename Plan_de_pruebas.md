@@ -147,13 +147,32 @@ Las pruebas funcionales se ejecutaron sobre la interfaz Swing de la aplicación,
 
 ---
 
-## 4. Resumen General de Resultados
+### Casos de Prueba Unitarios de la Mejora (Módulo Obra Social)
 
-| Categoría de Pruebas | Casos Planificados | Aprobados (OK) | Fallas | Tasa de Éxito |
-|---|:---:|:---:|:---:|:---:|
-| **Pruebas Unitarias (JUnit 5)** | 6 | 6 | 0 | **100%** |
-| **Pruebas Funcionales (UI Swing)** | 49 | 49 | 0 | **100%** |
-| **TOTAL** | **55** | **55** | **0** | **100%** |
+| Test ID | Método de Prueba | Regla de Negocio / Módulo | Resultado Esperado | Resultado Obtenido | Estado |
+|---|---|---|---|---|:---:|
+| **TU-07** | `testCoberturaTotalEnConsulta()` | **RN6.1 (Obra Social):** Cobertura 100% en honorarios médicos | Consulta de lista de $10.000 se cubre al 100%, copago resultante de $0 | Descuento OS: $10.000,00; Copago: $0,00 | **APROBADO** |
+| **TU-08** | `testDescuentosPolimorficosMedicamentos()` | **RN6.2 (Obra Social):** Cobertura escalonada según plan | Descuentos sobre medicamento de $4.000:<br>• Básico (25%): $1.000<br>• Premium (50%): $2.000<br>• Black (100%): $4.000 | Cobertura polimórfica calculada con exactitud en los 3 planes | **APROBADO** |
+| **TU-09** | `testSuspensionAutomaticaPorMorosidad()` | **RN6.3 (Obra Social):** Suspensión por acumular 2 cuotas impagas | Con 1 mes en gracia sigue habilitada; con 2 meses muta a `SUSPENDIDA` y desactiva cobertura | Estado `SUSPENDIDA` activado automáticamente al 2° mes; `estaHabilitada()` retorna `false` | **APROBADO** |
+| **TU-10** | `testCobroCuotaReactivacionYRecibo()` | **RN6.4 (Obra Social):** Regularización de deuda y emisión de recibo | Se cobra 1 cuota ($5.000), emite `ReciboCuota`, deuda baja a 1 mes y reactiva cobertura a `ACTIVA` | Recibo emitido, cuota registrada, estado reactivado a `ACTIVA` y habilitada | **APROBADO** |
+| **TU-11** | `testRestriccionDobleAfiliacionActiva()` | **RN6.5 (Obra Social):** Restricción de doble afiliación activa | Lanza `ReglaNegocioException` al intentar afiliar una mascota con credencial activa vigente | Excepción capturada con éxito; padrón protegido contra duplicados | **APROBADO** |
+
+> **Resultado Unitario Consolidado:** 11 pruebas ejecutadas, **11 superadas (100%)**, 0 fallas.
+
+---
+
+### Pruebas Funcionales de la Mejora (Interfaz Swing - PanelObraSocial)
+
+#### CU-28 a CU-31: Módulo de Obra Social y Planes de Salud
+
+| Caso | Acción del Usuario | Resultado Esperado | Resultado Obtenido | Estado |
+|---|---|---|---|:---:|
+| PF-OS-01 | Afiliar mascota seleccionando Dueño, Mascota y Plan Básico (CU28) | Genera credencial con prefijo `OS-BAS-`, la asocia al paciente y la muestra en la tabla | Afiliación confirmada con credencial correlativa en el padrón | **APROBADO** |
+| PF-OS-02 | Cobrar cuota mensual seleccionando medio de pago (CU29) | Abre diálogo con importe de cuota, emite comprobante formateado y actualiza contadores | Recibo de cuota generado con detalle completo de pago | **APROBADO** |
+| PF-OS-03 | Modificar plan de salud a paciente afiliado (CU30) | Permite migrar de Plan Básico a Premium/Black actualizando cuota y beneficios | Plan actualizado inmediatamente reflejado en la tabla | **APROBADO** |
+| PF-OS-04 | Simular mora acumulando 2 meses impagos | Incrementa cuotas adeudadas y al llegar a 2 muestra alerta de suspensión automática | Alerta visual emitida y columna ¿Habilitada? cambia a 'NO' | **APROBADO** |
+| PF-OS-05 | Emitir factura para mascota con obra social suspendida | Al estar suspendida por mora, la consulta y remedios se liquidan al 100% particular | Factura emitida a precio regular de lista sin descuentos | **APROBADO** |
+| PF-OS-06 | Regularizar cuota impaga y volver a facturar | Cobra cuota adeudada, reactiva carnet y la siguiente factura aplica 100% de descuento en consulta | Descuento de obra social aplicado automáticamente | **APROBADO** |
 
 ### Conclusión
 Todas las pruebas unitarias y funcionales planificadas fueron ejecutadas satisfactoriamente, certificando que el sistema **Huellitas** cumple en su totalidad con los requisitos de la Propuesta B, las reglas de negocio críticas y la estabilidad en su interfaz de usuario y persistencia.

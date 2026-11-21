@@ -22,6 +22,7 @@ import InventarioProveedores.Proveedor;
 import PersonasMascota.Dueño;
 import PersonasMascota.Perro;
 import PersonasMascota.Veterinario;
+import ObraSocial.*;
 
 // Pruebas unitarias para validar las reglas de negocio críticas del sistema.
 
@@ -158,6 +159,102 @@ public class PruebasUnitarias {
         }, "No se debe poder anular una factura ya anulada");
     }
 
+    // =========================================================
+    // PRUEBAS DE LA MEJORA: OBRA SOCIAL
+    // =========================================================
+
+    // TEST 7: Cobertura total de honorarios en Consulta Médica (RN6.1)
+    @Test
+    public void testCoberturaTotalEnConsulta() {
+        PlanObraSocial plan = new PlanBasico();
+        List<LineaFactura> lineas = new ArrayList<>();
+        lineas.add(new LineaFactura("Consulta general", 1, 10000.0)); // esConsulta() == true
+
+        double descuentoOS = calculador.calcularDescuentoObraSocial(lineas, plan);
+        double subtotal = calculador.calcularSubtotal(lineas);
+        double copago = subtotal - descuentoOS;
+
+        assertEquals(10000.0, descuentoOS, 0.01, "La consulta debe estar 100% cubierta");
+        assertEquals(0.0, copago, 0.01, "El copago de la consulta debe ser $0");
+    }
+
+    // TEST 8: Descuentos polimórficos escalonados en Medicamentos (RN6.2)
+    @Test
+    public void testDescuentosPolimorficosMedicamentos() {
+        List<LineaFactura> lineas = new ArrayList<>();
+        Producto antibiotico = new Producto(1, "Antibiótico", "Inyectable", 4000.0, null, 10);
+
+        // Al pasar el objeto antibiotico, esConsulta() devuelve false y aplica descuento de medicamento
+        lineas.add(new LineaFactura(antibiotico, 1));
+
+        PlanObraSocial basico = new PlanBasico();
+        PlanObraSocial premium = new PlanPremium();
+        PlanObraSocial black = new PlanBlack();
+
+        // Plan Básico: 25% de $4.000 = $1.000
+        assertEquals(1000.0, calculador.calcularDescuentoObraSocial(lineas, basico), 0.01, "Plan Básico debe descontar 25% en medicamentos");
+
+        // Plan Premium: 50% de $4.000 = $2.000
+        assertEquals(2000.0, calculador.calcularDescuentoObraSocial(lineas, premium), 0.01, "Plan Premium debe descontar 50% en medicamentos");
+
+        // Plan Black: 100% de $4.000 = $4.000
+        assertEquals(4000.0, calculador.calcularDescuentoObraSocial(lineas, black), 0.01, "Plan Black debe cubrir 100% en medicamentos");
+    }
+
+    // TEST 9: Suspensión automática de cobertura por acumulación de 2 meses de mora (RN6.3)
+    @Test
+    public void testSuspensionAutomaticaPorMorosidad() {
+        AfiliacionPlan afil = new AfiliacionPlan("OS-BAS-0001", perroPrueba, new PlanBasico());
+
+        // Al inicio: al día y habilitada
+        assertTrue(afil.estaHabilitada(), "Al inicio debe estar habilitada");
+        assertEquals(EstadoCobertura.ACTIVA, afil.getEstado());
+
+        // Acumula 1 mes impago: período de gracia
+        afil.acumularMesImpago();
+        assertEquals(1, afil.getMesesAdeudados());
+        assertTrue(afil.estaHabilitada(), "Con 1 mes impago sigue habilitada por período de gracia");
+
+        // Acumula 2 meses impagos: suspensión automática
+        afil.acumularMesImpago();
+        assertEquals(2, afil.getMesesAdeudados());
+        assertEquals(EstadoCobertura.SUSPENDIDA, afil.getEstado(), "Al acumular 2 meses debe suspenderse automáticamente");
+        assertFalse(afil.estaHabilitada(), "Suspendida no debe estar habilitada para descuentos");
+    }
+
+    // TEST 10: Cobro de cuota, emisión de Recibo y reactivación automática (RN6.4)
+    @Test
+    public void testCobroCuotaReactivacionYRecibo() throws ReglaNegocioException {
+        ControladorObraSocial ctrlOS = new ControladorObraSocial();
+        AfiliacionPlan afil = ctrlOS.afiliarMascota(perroPrueba, new PlanBasico());
+
+        // Llevamos la afiliación a suspensión (2 meses de mora)
+        afil.acumularMesImpago();
+        afil.acumularMesImpago();
+        assertEquals(EstadoCobertura.SUSPENDIDA, afil.getEstado());
+
+        // Se cobra 1 cuota mensual
+        ReciboCuota recibo = ctrlOS.cobrarCuota(afil.getNumeroCredencial(), MedioPago.EFECTIVO);
+
+        assertNotNull(recibo, "Debe emitirse un recibo de cobro de cuota");
+        assertEquals(5000.0, recibo.getMontoAbonado(), 0.01, "El monto abonado debe ser el de la cuota del Plan Básico");
+        assertEquals(1, afil.getMesesAdeudados(), "La deuda debe haber disminuido a 1 mes");
+        assertEquals(EstadoCobertura.ACTIVA, afil.getEstado(), "Al regularizar por debajo de 2 cuotas debe reactivarse automáticamente");
+        assertTrue(afil.estaHabilitada(), "Debe recuperar la habilitación de cobertura");
+    }
+
+    // TEST 11: Restricción de doble afiliación activa simultánea (RN6.5)
+    @Test
+    public void testRestriccionDobleAfiliacionActiva() throws ReglaNegocioException {
+        ControladorObraSocial ctrlOS = new ControladorObraSocial();
+        ctrlOS.afiliarMascota(perroPrueba, new PlanBasico());
+
+        // Intentar afiliar de nuevo la misma mascota debe lanzar excepción
+        assertThrows(ReglaNegocioException.class, () -> {
+            ctrlOS.afiliarMascota(perroPrueba, new PlanPremium());
+        }, "No se debe permitir afiliar una mascota que ya posee afiliación activa");
+    }
+
     // Permite ejecutar las pruebas directamente con el botón Play
     public static void main(String[] args) {
         System.out.println("=================================================");
@@ -230,6 +327,61 @@ public class PruebasUnitarias {
             exitosas++;
         } catch (Throwable t) {
             System.err.println("  [FALLO] TEST 6: " + t.getMessage());
+            fallidas++;
+        }
+
+        // TEST 7
+        try {
+            tests.setUp();
+            tests.testCoberturaTotalEnConsulta();
+            System.out.println("  [OK] TEST 7: Cobertura 100% en Consulta Médica (RN6.1)");
+            exitosas++;
+        } catch (Throwable t) {
+            System.err.println("  [FALLO] TEST 7: " + t.getMessage());
+            fallidas++;
+        }
+
+        // TEST 8
+        try {
+            tests.setUp();
+            tests.testDescuentosPolimorficosMedicamentos();
+            System.out.println("  [OK] TEST 8: Descuentos Polimórficos en Medicamentos (RN6.2)");
+            exitosas++;
+        } catch (Throwable t) {
+            System.err.println("  [FALLO] TEST 8: " + t.getMessage());
+            fallidas++;
+        }
+
+        // TEST 9
+        try {
+            tests.setUp();
+            tests.testSuspensionAutomaticaPorMorosidad();
+            System.out.println("  [OK] TEST 9: Suspensión automática por 2 meses de mora (RN6.3)");
+            exitosas++;
+        } catch (Throwable t) {
+            System.err.println("  [FALLO] TEST 9: " + t.getMessage());
+            fallidas++;
+        }
+
+        // TEST 10
+        try {
+            tests.setUp();
+            tests.testCobroCuotaReactivacionYRecibo();
+            System.out.println("  [OK] TEST 10: Cobro de cuota, Recibo y reactivación (RN6.4)");
+            exitosas++;
+        } catch (Throwable t) {
+            System.err.println("  [FALLO] TEST 10: " + t.getMessage());
+            fallidas++;
+        }
+
+        // TEST 11
+        try {
+            tests.setUp();
+            tests.testRestriccionDobleAfiliacionActiva();
+            System.out.println("  [OK] TEST 11: Restricción de doble afiliación activa (RN6.5)");
+            exitosas++;
+        } catch (Throwable t) {
+            System.err.println("  [FALLO] TEST 11: " + t.getMessage());
             fallidas++;
         }
 
