@@ -100,6 +100,11 @@ public class VentanaPrincipal extends JFrame {
                 "facturacion"
         );
 
+        panelContenido.add(
+                new PanelObraSocial(clinica),
+                "obrasocial"
+        );
+
         add(panelContenido, BorderLayout.CENTER);
 
         // Mostramos el inicio al abrir el sistema
@@ -145,6 +150,7 @@ public class VentanaPrincipal extends JFrame {
         agregarBoton(menu, "Historias clínicas", "historias");
         agregarBoton(menu, "Inventario y proveedores", "inventario");
         agregarBoton(menu, "Facturación", "facturacion");
+        agregarBoton(menu, "Obra Social", "obrasocial");
 
         menu.add(Box.createVerticalGlue());
 

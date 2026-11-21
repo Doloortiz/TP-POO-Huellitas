@@ -266,8 +266,7 @@ public class Main {
                     "López",
                     "30123456",
                     "1155443322",
-                    "carlos.lopez@email.com",
-                    true
+                    "carlos.lopez@email.com"
             );
 
             clinica.registrarDueño(d1);
@@ -293,8 +292,7 @@ public class Main {
                     "Rodríguez",
                     "28987654",
                     "1122334455",
-                    "maria.rod@email.com",
-                    false
+                    "maria.rod@email.com"
             );
 
             clinica.registrarDueño(d2);

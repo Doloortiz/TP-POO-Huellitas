@@ -17,7 +17,7 @@ public class PagoDebito implements EstrategiaPago {
     }
 
     @Override
-    public double getPorcentajeDescuento(boolean tienePlanSalud) {
+    public double getPorcentajeDescuento() {
         return 0.0;
     }
 

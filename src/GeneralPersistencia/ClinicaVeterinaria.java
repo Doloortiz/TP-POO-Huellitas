@@ -44,7 +44,7 @@ public class ClinicaVeterinaria implements Serializable {
     private final ControladorFacturacion facturacion;
     private final PlanificadorTurnos planificador = new PlanificadorTurnos();
     private final ServicioNotificaciones notificaciones;
-    private final ControladorObraSocial obraSocial;
+    private ControladorObraSocial obraSocial;
     private int proximoIdMascota = 1;
     private int proximoIdHistoria = 1;
 
@@ -296,6 +296,9 @@ public class ClinicaVeterinaria implements Serializable {
         return inventario.getCatalogoProductos();
     }
     public ControladorObraSocial getObraSocial() {
+        if (obraSocial == null) {
+            obraSocial = new ControladorObraSocial();
+        }
         return obraSocial;
     }
 

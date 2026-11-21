@@ -52,4 +52,9 @@ public class Dueño extends Persona {
     public boolean debePagarSeña() {
         return cantidadAusenciasSeguidas >= 3;
     }
+
+    @Override
+    public String toString() {
+        return obtenerNombreCompleto() + " (DNI: " + getDocumento() + ")";
+    }
 }

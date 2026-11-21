@@ -42,6 +42,7 @@ public class ControladorObraSocial implements Serializable {
         String numeroCredencial = String.format("%s%04d", prefijo, contadorCredenciales++);
 
         AfiliacionPlan nuevaAfiliacion = new AfiliacionPlan(numeroCredencial, mascota, plan);
+        mascota.setAfiliacion(nuevaAfiliacion);
         afiliados.put(numeroCredencial, nuevaAfiliacion);
 
         return nuevaAfiliacion;
