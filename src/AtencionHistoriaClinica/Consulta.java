@@ -3,6 +3,7 @@ import Excepciones.ReglaNegocioException;
 import PersonasMascota.Veterinario;
 import InventarioProveedores.Producto;
 import InventarioProveedores.Lote;
+import PersonasMascota.Mascota;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class Consulta implements Serializable {
     private List<Tratamiento> tratamientos;
     private List<AplicacionVacuna> vacunasAplicadas;
     private List<NotaRectificatoria> notasRectificatorias;
+    private Mascota mascota;
 
     public Consulta(int idConsulta, Veterinario veterinario, String motivo, double pesoDelDia, String diagnostico, String observaciones) {
         this.idConsulta = idConsulta;
@@ -81,6 +83,14 @@ public class Consulta implements Serializable {
 
     public List<AplicacionVacuna> getVacunasAplicadas() {
         return vacunasAplicadas;
+    }
+
+    public Mascota getMascota() {
+        return mascota;
+    }
+
+    public void setMascota(Mascota mascota) {
+        this.mascota = mascota;
     }
 
     // Agregar tratamiento a la consulta

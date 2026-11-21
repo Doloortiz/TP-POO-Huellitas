@@ -1,18 +1,14 @@
 package FacturacionNotificaciones;
 
-// Efectivo: 10 % de descuento. Si el dueño tiene plan de salud (15 %).
-// No se acumulan: se aplica solo el mayor.
+// Efectivo: 10 % de descuento.
 
 public class PagoEfectivo implements EstrategiaPago {
     private static final long serialVersionUID = 1L;
-    private static final double DESCUENTO_EFECTIVO = 0.10;
-    private static final double DESCUENTO_PLAN = 0.15;
 
     @Override
-    public double calcularTotal(double subtotal, boolean tienePlanSalud) {
-        EstrategiaPago.validarSubtotal(subtotal);
-        double porcentajeDescuento = getPorcentajeDescuento(tienePlanSalud);
-        double total = subtotal * (1 - porcentajeDescuento);
+    public double calcularTotal(double importe) {
+        EstrategiaPago.validarSubtotal(importe);
+        double total = importe * 0.90; // 10% de descuento
         return EstrategiaPago.redondear(total);
     }
 
@@ -22,15 +18,12 @@ public class PagoEfectivo implements EstrategiaPago {
     }
 
     @Override
-    public double getPorcentajeDescuento(boolean tienePlanSalud) {
-        if (tienePlanSalud) {
-            return DESCUENTO_PLAN;
-        }
-        return DESCUENTO_EFECTIVO;
+    public double getPorcentajeDescuento() {
+        return 0.10;
     }
 
     @Override
     public double getPorcentajeRecargo() {
-        return 0;
+        return 0.0;
     }
 }

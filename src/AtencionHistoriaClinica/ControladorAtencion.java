@@ -25,6 +25,7 @@ public class ControladorAtencion {
         }
         mascota.actualizarPeso(peso);
         Consulta consulta = new Consulta(contadorConsultas++, vet, motivo, peso, diagnostico, observaciones);
+        consulta.setMascota(mascota);
         return consulta;
     }
 

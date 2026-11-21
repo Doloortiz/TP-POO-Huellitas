@@ -9,17 +9,15 @@ public class Dueño extends Persona {
     private static final long serialVersionUID = 1L;
     private String correo;
     private List<Mascota> mascotas;
-    private boolean esPlanSalud;
     private int cantidadAusenciasSeguidas;
 
     public Dueño(String nombre, String apellido,
                  String documento, String telefono,
-                 String correo, boolean esPlanSalud) {
+                 String correo) {
 
         super(nombre, apellido, documento, telefono);
 
         this.correo = correo;
-        this.esPlanSalud = esPlanSalud;
         this.mascotas = new ArrayList<Mascota>();
         this.cantidadAusenciasSeguidas = 0;
     }
@@ -53,9 +51,5 @@ public class Dueño extends Persona {
 
     public boolean debePagarSeña() {
         return cantidadAusenciasSeguidas >= 3;
-    }
-
-    public boolean tieneDescuentoPlan() {
-        return esPlanSalud;
     }
 }

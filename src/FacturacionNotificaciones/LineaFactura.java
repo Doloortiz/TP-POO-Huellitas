@@ -50,6 +50,10 @@ public class LineaFactura implements Serializable {
         return EstrategiaPago.redondear(cantidad * precioBase);
     }
 
+    public boolean esConsulta() {
+        return this.producto == null; // Si no tiene producto es una consulta
+    }
+
     public String getDescripcion() { return descripcion; }
     public Producto getProducto() { return producto; }
     public int getCantidad() { return cantidad; }

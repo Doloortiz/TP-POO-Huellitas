@@ -36,7 +36,7 @@ public class PruebasUnitarias {
     @BeforeEach
     public void setUp() {
         // Inicialización de objetos base para cada prueba
-        duenoPrueba = new Dueño("Juan", "Pérez", "30111222", "1144445555", "juan@test.com", false);
+        duenoPrueba = new Dueño("Juan", "Pérez", "30111222", "1144445555", "juan@test.com");
         HistoriaClinica hc = new HistoriaClinica(1);
         perroPrueba = new Perro(1, duenoPrueba, hc, "Milo", "Perro", "Labrador", "Macho", LocalDate.now().minusYears(2), 25.0, "CHIP-01", "Grande");
         duenoPrueba.agregarMascota(perroPrueba);
@@ -55,8 +55,11 @@ public class PruebasUnitarias {
         List<LineaFactura> lineas = new ArrayList<>();
         lineas.add(new LineaFactura("Consulta general", 1, 10000.0));
 
+        double subtotal = calculador.calcularSubtotal(lineas);
         EstrategiaPago estrategiaEfectivo = new PagoEfectivo();
-        double total = calculador.calcularImporteFinal(lineas, estrategiaEfectivo, false);
+
+        // Calcula el total pasando el subtotal/copago al método limpio:
+        double total = calculador.calcularImporteFinal(subtotal, estrategiaEfectivo);
 
         // Subtotal $10.000 con 10% de descuento debe ser exactamente $9.000
         assertEquals(9000.0, total, 0.01, "El pago en efectivo debe otorgar un 10% de descuento");
@@ -68,8 +71,11 @@ public class PruebasUnitarias {
         List<LineaFactura> lineas = new ArrayList<>();
         lineas.add(new LineaFactura("Consulta general", 1, 10000.0));
 
+        double subtotal = calculador.calcularSubtotal(lineas);
         EstrategiaPago estrategiaCredito = new PagoCredito();
-        double total = calculador.calcularImporteFinal(lineas, estrategiaCredito, false);
+
+        // Calcula el total pasando el subtotal/copago al método limpio:
+        double total = calculador.calcularImporteFinal(subtotal, estrategiaCredito);
 
         // Subtotal $10.000 con 8% de recargo debe ser exactamente $10.800
         assertEquals(10800.0, total, 0.01, "El pago con crédito debe aplicar un 8% de recargo");

@@ -1,5 +1,4 @@
 package GeneralPersistencia;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,6 +26,7 @@ import InventarioProveedores.Producto;
 import PersonasMascota.Dueño;
 import PersonasMascota.Mascota;
 import PersonasMascota.Veterinario;
+import ObraSocial.ControladorObraSocial;
 
 // Controlador raiz (GRASP): reune los datos de la clinica y los controladores de cada modulo.
 // Es el unico objeto que GestorArchivos guarda y carga. Al serializar UNA sola raiz, los objetos
@@ -44,6 +44,7 @@ public class ClinicaVeterinaria implements Serializable {
     private final ControladorFacturacion facturacion;
     private final PlanificadorTurnos planificador = new PlanificadorTurnos();
     private final ServicioNotificaciones notificaciones;
+    private final ControladorObraSocial obraSocial;
     private int proximoIdMascota = 1;
     private int proximoIdHistoria = 1;
 
@@ -61,6 +62,7 @@ public class ClinicaVeterinaria implements Serializable {
         this.notificaciones = notificaciones;
         this.facturacion = new ControladorFacturacion(new CalculadorFacturacion(), notificaciones);
         this.inventario = new ControladorInventario(this);
+        this.obraSocial = new ControladorObraSocial();
     }
 
     // Dueños y mascotas (CU01, CU02, CU17, CU26)
@@ -292,6 +294,9 @@ public class ClinicaVeterinaria implements Serializable {
     public String getNombre() { return nombre; }
     public List<Producto> getCatalogoProductos() {
         return inventario.getCatalogoProductos();
+    }
+    public ControladorObraSocial getObraSocial() {
+        return obraSocial;
     }
 
     // Guarda el producto en el catálogo

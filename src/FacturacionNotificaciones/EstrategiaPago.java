@@ -4,15 +4,13 @@ import java.io.Serializable;
 // Interfaz para calcular importes finales con recargos o descuentos.
 
 public interface EstrategiaPago extends Serializable {
-    // Importe final = subtotal con descuento/recargo del medio de pago (RN5.2 a RN5.6)
-    double calcularTotal(double subtotal, boolean tienePlanSalud);
+    // Aplicar recargo o descuento del medio de pago
+    double calcularTotal(double importe);
 
     MedioPago getMedioPago();
 
-    // Porcentaje de descuento aplicado (0.15 = 15 %). Se usa para mostrar el detalle (CU24).
-    double getPorcentajeDescuento(boolean tienePlanSalud);
+    double getPorcentajeDescuento();
 
-    // Porcentaje de recargo aplicado (0.08 = 8 %).
     double getPorcentajeRecargo();
 
     static double redondear(double valor) {
@@ -21,7 +19,7 @@ public interface EstrategiaPago extends Serializable {
 
     static void validarSubtotal(double subtotal) {
         if (subtotal < 0) {
-            throw new IllegalArgumentException("El subtotal no puede ser negativo.");
+            throw new IllegalArgumentException("El importe no puede ser negativo.");
         }
     }
 }

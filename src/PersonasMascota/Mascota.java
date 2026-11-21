@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.io.Serializable;
 import AtencionHistoriaClinica.HistoriaClinica;
+import ObraSocial.AfiliacionPlan;
 
 // Representa a una mascota con sus datos generales y su historia clínica.
 
@@ -18,6 +19,7 @@ public abstract class Mascota implements Serializable {
     private String sexo;
     private LocalDate fechaNacimiento;
     private double pesoActual;
+    protected AfiliacionPlan afiliacion;
 
     public Mascota(int idMascota, Dueño dueño, HistoriaClinica historiaClinica, String nombre, String especie, String raza, String sexo, LocalDate fechaNacimiento, double pesoActual) {
 
@@ -81,6 +83,18 @@ public abstract class Mascota implements Serializable {
 
     public void setDueño(Dueño dueño) {
         this.dueño = dueño;
+    }
+
+    public AfiliacionPlan getAfiliacion() {
+        return afiliacion;
+    }
+
+    public void setAfiliacion(AfiliacionPlan afiliacion) {
+        this.afiliacion = afiliacion;
+    }
+
+    public boolean tieneObraSocialActiva() {
+        return afiliacion != null && afiliacion.estaHabilitada();
     }
 
     @Override

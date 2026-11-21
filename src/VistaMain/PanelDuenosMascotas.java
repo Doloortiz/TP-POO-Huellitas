@@ -234,9 +234,6 @@ public class PanelDuenosMascotas extends JPanel {
         JTextField telefono = new JTextField();
         JTextField correo = new JTextField();
 
-        JCheckBox planSalud =
-                new JCheckBox("Tiene plan de salud");
-
         JPanel formulario = new JPanel(new GridLayout(0, 2, 10, 10));
 
         formulario.add(new JLabel("Nombre:"));
@@ -253,9 +250,6 @@ public class PanelDuenosMascotas extends JPanel {
 
         formulario.add(new JLabel("Correo electrónico:"));
         formulario.add(correo);
-
-        formulario.add(new JLabel("Plan de salud:"));
-        formulario.add(planSalud);
 
         int opcion = JOptionPane.showConfirmDialog(
                 this,
@@ -287,8 +281,7 @@ public class PanelDuenosMascotas extends JPanel {
                     apellido.getText().trim(),
                     documento.getText().trim(),
                     telefono.getText().trim(),
-                    correo.getText().trim(),
-                    planSalud.isSelected()
+                    correo.getText().trim()
             );
 
             // Utilizamos el método de registro existente.

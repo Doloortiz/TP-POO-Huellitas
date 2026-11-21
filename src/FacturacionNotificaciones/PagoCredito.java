@@ -4,16 +4,12 @@ package FacturacionNotificaciones;
  
 public class PagoCredito implements EstrategiaPago {
     private static final long serialVersionUID = 1L;
-    private static final double RECARGO_CREDITO = 0.08;
-    private static final double DESCUENTO_PLAN = 0.15;
 
     @Override
-    public double calcularTotal(double subtotal, boolean tienePlanSalud) {
-        EstrategiaPago.validarSubtotal(subtotal);
-        double porcentajeDescuento = getPorcentajeDescuento(tienePlanSalud);
-        double totalConDescuento = subtotal * (1 - porcentajeDescuento);
-        double totalConRecargo = totalConDescuento * (1 + getPorcentajeRecargo());
-        return EstrategiaPago.redondear(totalConRecargo);
+    public double calcularTotal(double importe) {
+        EstrategiaPago.validarSubtotal(importe);
+        double total = importe * 1.08; // 8% de recargo
+        return EstrategiaPago.redondear(total);
     }
 
     @Override
@@ -22,15 +18,12 @@ public class PagoCredito implements EstrategiaPago {
     }
 
     @Override
-    public double getPorcentajeDescuento(boolean tienePlanSalud) {
-        if (tienePlanSalud) {
-            return DESCUENTO_PLAN;
-        }
-        return 0;
+    public double getPorcentajeDescuento() {
+        return 0.0;
     }
 
     @Override
     public double getPorcentajeRecargo() {
-        return RECARGO_CREDITO;
+        return 0.08;
     }
 }

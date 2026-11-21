@@ -3,6 +3,7 @@ package FacturacionNotificaciones;
 import AtencionHistoriaClinica.Consulta;
 import Excepciones.FacturacionException;
 import PersonasMascota.Dueño;
+import ObraSocial.PlanObraSocial;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ public class Factura implements Comparable<Factura>, Serializable {
     private boolean aplicoPlanSalud; // foto del plan al momento de emitir
     private boolean emitida;
     private boolean estaAnulada;
+    private double descuentoObraSocial;
+    private double montoCopago;
+    private String nombrePlanAplicado;
 
     public Factura(int numeroFactura, Dueño dueño, Consulta consulta, EstrategiaPago estrategiaPago) {
         if (dueño == null || consulta == null || estrategiaPago == null) {
@@ -54,9 +58,25 @@ public class Factura implements Comparable<Factura>, Serializable {
         if (emitida) {
             throw new FacturacionException("La factura ya fue emitida.");
         }
-        this.aplicoPlanSalud = dueño.tieneDescuentoPlan();
+        // Subtotal bruto de todos los ítems
         this.subtotal = calculador.calcularSubtotal(lineas);
-        this.montoTotal = calculador.calcularImporteFinal(lineas, estrategiaPago, aplicoPlanSalud);
+        // Si la mascota tiene Obra Social activa
+        boolean tieneOS = (consulta != null && consulta.getMascota() != null
+                && consulta.getMascota().tieneObraSocialActiva());
+        if (tieneOS) {
+            PlanObraSocial plan = consulta.getMascota().getAfiliacion().getPlan();
+            this.nombrePlanAplicado = plan.getNombrePlan();
+            this.descuentoObraSocial = calculador.calcularDescuentoObraSocial(lineas, plan);
+            this.aplicoPlanSalud = true;
+        } else {
+            this.nombrePlanAplicado = "Particular (Sin Obra Social)";
+            this.descuentoObraSocial = 0.0;
+            this.aplicoPlanSalud = false;
+        }
+        // Lo que queda pagar después del descuento de la Obra Social
+        this.montoCopago = EstrategiaPago.redondear(Math.max(0.0, this.subtotal - this.descuentoObraSocial));
+        // Total final aplica la estrategia del medio de pago (Efectivo/Tarjeta) sobre el copago
+        this.montoTotal = calculador.calcularImporteFinal(this.montoCopago, estrategiaPago);
         this.fecha = LocalDateTime.now();
         this.emitida = true;
     }
@@ -84,12 +104,12 @@ public class Factura implements Comparable<Factura>, Serializable {
     }
 
     public double getPorcentajeDescuento() {
-        return estrategiaPago.getPorcentajeDescuento(aplicoPlanSalud);
+        return estrategiaPago.getPorcentajeDescuento();
     }
 
     public double getPorcentajeRecargo() { return estrategiaPago.getPorcentajeRecargo(); }
 
-    // Texto de detalle para consultas (CU24)
+    // Texto de detalle para consultas
     public String obtenerDetalle() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("Factura N° %d - %s%n", numeroFactura, estaAnulada ? "ANULADA" : "EMITIDA"));
@@ -98,7 +118,11 @@ public class Factura implements Comparable<Factura>, Serializable {
             sb.append(String.format("  %-25s x%d  $%.2f  = $%.2f%n",
                     l.getDescripcion(), l.getCantidad(), l.getPrecioBase(), l.calcularSubtotal()));
         }
-        sb.append(String.format("Subtotal: $%.2f%n", subtotal));
+        sb.append(String.format("Subtotal Bruto: $%.2f%n", subtotal));
+        if (descuentoObraSocial > 0) {
+            sb.append(String.format("Cobertura Obra Social (%s): -$%.2f%n", nombrePlanAplicado, descuentoObraSocial));
+            sb.append(String.format("Copago a abonar: $%.2f%n", montoCopago));
+        }
         sb.append(String.format("Medio de pago: %s | Descuento: %.0f%% | Recargo: %.0f%%%n",
                 estrategiaPago.getMedioPago().getDescripcion(),
                 getPorcentajeDescuento() * 100, getPorcentajeRecargo() * 100));
@@ -127,4 +151,7 @@ public class Factura implements Comparable<Factura>, Serializable {
     public double getMontoTotal() { return montoTotal; }
     public boolean estaEmitida() { return emitida; }
     public boolean estaAnulada() { return estaAnulada; }
+    public double getDescuentoObraSocial() { return descuentoObraSocial; }
+    public double getMontoCopago() { return montoCopago; }
+    public String getNombrePlanAplicado() { return nombrePlanAplicado; }
 }
