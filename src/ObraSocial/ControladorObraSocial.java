@@ -61,6 +61,10 @@ public class ControladorObraSocial implements Serializable {
         if (afil.getEstado() == EstadoCobertura.DADA_DE_BAJA) {
             throw new ReglaNegocioException("No se pueden cobrar cuotas a una afiliación dada de baja.");
         }
+        if (afil.getMesesAdeudados() <=0 ) {
+            throw new ReglaNegocioException("La mascota '" + afil.getMascota().getNombre()
+                    + "' ya se encuentra al día. No registra cuotas pendientes de cobro.");
+        }
 
         double montoCuota = afil.getPlan().getCuotaMensual();
         afil.registrarPagoCuota();

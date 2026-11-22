@@ -224,6 +224,9 @@ public class PanelFacturacion extends JPanel {
                     lineas.add(new LineaFactura(tratamiento.getMedicamento(), 1));
                 }
             }
+            if (consulta.getMascota() == null) {
+                consulta.setMascota(mascota);
+            }
             Factura factura = clinica.getFacturacion().emitirFactura(
                     mascota.getDueño(), consulta, medioPago, lineas);
 

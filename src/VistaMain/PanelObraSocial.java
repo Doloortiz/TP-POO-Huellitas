@@ -237,6 +237,13 @@ public class PanelObraSocial extends JPanel {
         AfiliacionPlan afil = clinica.getObraSocial().buscarPorCredencial(credencial);
         if (afil == null) return;
 
+        if (afil.getMesesAdeudados() <= 0) {
+            JOptionPane.showMessageDialog(this,
+                    "La mascota '" + afil.getMascota().getNombre() + "' ya se encuentra AL DÍA.\nNo registra cuotas adeudadas para cobrar.",
+                    "Afiliación al Día", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
         MedioPago[] medios = MedioPago.values();
         MedioPago medioSeleccionado = (MedioPago) JOptionPane.showInputDialog(
                 this,
